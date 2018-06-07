@@ -28,9 +28,10 @@ public class Sudoku {
                 if (solved) {
                     return true;
                 }
-                solution[cur] = 0;
             }
         }
+        solution[cur] = 0;
+
         return false;
     }
 
@@ -83,8 +84,8 @@ public class Sudoku {
 
     private boolean validBox(int row, int col) {
         int[] numsInBox = new int[DIMEN];
-        int topLeftBoxRow = row / 3;
-        int topLeftBoxCol = col / 3;
+        int topLeftBoxRow = row / 3 * 3;
+        int topLeftBoxCol = col / 3 * 3;
 
         for (int i = 0; i < 3; ++i) {
             for (int j = 0; j < 3; ++j) {
