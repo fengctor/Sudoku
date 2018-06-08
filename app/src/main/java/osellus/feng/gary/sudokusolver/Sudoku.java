@@ -15,8 +15,12 @@ public class Sudoku {
         this.solution = puzzle;
     }
 
-    public boolean solveFrom(int row, int col) {
-        int cur = firstEmptyFrom(row, col);
+    public boolean solve() {
+        return solveFrom(0);
+    }
+
+    private boolean solveFrom(int index) {
+        int cur = firstEmptyFrom(index);
         if (cur < 0) {
             return true;
         }
@@ -24,14 +28,13 @@ public class Sudoku {
         for (int i = 1; i <= DIMEN; ++i) {
             solution[cur] = i;
             if (validChoice(cur)) {
-                boolean solved = solveFrom(row, col);
+                boolean solved = solveFrom(getIndex(cur / DIMEN, cur % DIMEN));
                 if (solved) {
                     return true;
                 }
             }
         }
         solution[cur] = 0;
-
         return false;
     }
 
@@ -102,9 +105,7 @@ public class Sudoku {
         return true;
     }
 
-    private int firstEmptyFrom(int row, int col) {
-        int start = getIndex(row, col);
-
+    private int firstEmptyFrom(int start) {
         for (int i = start; i < DIMEN * DIMEN; ++i) {
             if (solution[i] == 0) {
                 return i;
@@ -112,5 +113,14 @@ public class Sudoku {
         }
 
         return -1;
+    }
+
+    public void printSolution() {
+        for (int i = 0; i < DIMEN * DIMEN; ++i) {
+            if (i % DIMEN == 0) {
+                System.out.println("");
+            }
+            System.out.print(solution[i]);
+        }
     }
 }
