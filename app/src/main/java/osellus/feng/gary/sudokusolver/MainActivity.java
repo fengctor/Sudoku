@@ -4,8 +4,10 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayout;
+import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
@@ -22,17 +24,20 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mGridLayout = findViewById(R.id.grid);
+        EditText prevEditText = null;
         int editTextId;
 
-        for (int i = 0; i < 9; ++i) {
-            for (int j = 0; j < 9; ++j) {
-                EditText editText = createBaseEditText();
-                editTextId = View.generateViewId();
+        for (int i = 0; i < 81; ++i) {
+            EditText editText = createBaseEditText();
+            editTextId = View.generateViewId();
 
-                editText.setId(editTextId);
-
-                mGridLayout.addView(editText, i);
+            editText.setId(editTextId);
+            if (prevEditText != null) {
+                prevEditText.setNextFocusForwardId(editTextId);
             }
+
+            mGridLayout.addView(editText, i);
+            prevEditText = editText;
         }
 
         Button solveButton = findViewById(R.id.solve_button);
@@ -61,6 +66,41 @@ public class MainActivity extends AppCompatActivity {
         GridLayout.LayoutParams layoutParams = new GridLayout.LayoutParams(GridLayout.spec(GridLayout.UNDEFINED, 1f), GridLayout.spec(GridLayout.UNDEFINED, 1f));
         layoutParams.setGravity(Gravity.CENTER);
         editText.setLayoutParams(layoutParams);
+        editText.setSelectAllOnFocus(true);
+
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+                if (charSequence.length() == 0) {
+                    return;
+                }
+                char enteredChar = charSequence.charAt(0);
+                if (enteredChar == '\n' || enteredChar == ' ') {
+                    editText.setText("");
+                } else if (!Character.isDigit(enteredChar)) {
+                    editText.setText("");
+                    return;
+                }
+
+
+                int nextId = editText.getNextFocusForwardId();
+                if (nextId >= 0) {
+                    EditText next = findViewById(nextId);
+                    next.requestFocus();
+                }
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
 
         return editText;
     }
