@@ -53,7 +53,11 @@ public class MainActivity extends AppCompatActivity {
         final EditText editText = new EditText(this);
 
         editText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
+        editText.setTextSize(14);
         editText.setFilters(new InputFilter[] {new InputFilter.LengthFilter(EDIT_MAX_LEN)});
+        GridLayout.LayoutParams layoutParams = new GridLayout.LayoutParams(GridLayout.spec(GridLayout.UNDEFINED, 1f), GridLayout.spec(GridLayout.UNDEFINED, 1f));
+        layoutParams.setGravity(Gravity.CENTER);
+        editText.setLayoutParams(layoutParams);
 
         return editText;
     }
