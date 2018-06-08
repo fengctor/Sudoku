@@ -1,43 +1,59 @@
 package osellus.feng.gary.sudokusolver;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.GridLayout;
+import android.support.v7.widget.ViewUtils;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 
 public class MainActivity extends AppCompatActivity {
     private final int EDIT_MAX_LEN = 1;
 
-    private GridLayout mGridLayout;
+    private TableLayout mTableLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mGridLayout = findViewById(R.id.grid);
+        mTableLayout = findViewById(R.id.grid);
         EditText prevEditText = null;
         int editTextId;
 
-        for (int i = 0; i < 81; ++i) {
-            EditText editText = createBaseEditText();
-            editTextId = View.generateViewId();
+        for (int i = 0; i < Sudoku.DIMEN; ++i) {
+            TableRow row = new TableRow(this);
+            for (int j = 0; j < Sudoku.DIMEN; ++j) {
+                EditText editText = createBaseEditText();
+                editTextId = View.generateViewId();
+                editText.setId(editTextId);
 
-            editText.setId(editTextId);
-            if (prevEditText != null) {
-                prevEditText.setNextFocusForwardId(editTextId);
+                if (prevEditText != null) {
+                    prevEditText.setNextFocusForwardId(editTextId);
+                }
+
+                prevEditText = editText;
+                row.addView(editText, j);
             }
 
-            mGridLayout.addView(editText, i);
-            prevEditText = editText;
+            TableLayout.LayoutParams layoutParams = new TableLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    1);
+            row.setLayoutParams(layoutParams);
+
+            mTableLayout.addView(row, i);
         }
 
         Button solveButton = findViewById(R.id.solve_button);
@@ -48,11 +64,12 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        Button resetButton = findViewById(R.id.reset_button);
+        final Button resetButton = findViewById(R.id.reset_button);
         resetButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 resetGrid();
+                resetButton.requestFocus();
             }
         });
     }
@@ -61,12 +78,17 @@ public class MainActivity extends AppCompatActivity {
         final EditText editText = new EditText(this);
 
         editText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
+        editText.setText("0");
         editText.setTextSize(14);
         editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(EDIT_MAX_LEN)});
-        GridLayout.LayoutParams layoutParams = new GridLayout.LayoutParams(GridLayout.spec(GridLayout.UNDEFINED, 1f), GridLayout.spec(GridLayout.UNDEFINED, 1f));
-        layoutParams.setGravity(Gravity.CENTER);
+        editText.setBackgroundResource(R.drawable.border_white);
+        TableRow.LayoutParams layoutParams = new TableRow.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                1);
         editText.setLayoutParams(layoutParams);
         editText.setSelectAllOnFocus(true);
+        editText.setGravity(Gravity.CENTER);
 
         editText.addTextChangedListener(new TextWatcher() {
             @Override
@@ -76,12 +98,21 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
-                if (charSequence.length() == 0) {
+                if (charSequence.length() == 0 || editText.getTag() != null) {
                     return;
                 }
                 char enteredChar = charSequence.charAt(0);
-                if (enteredChar == '\n' || enteredChar == ' ') {
-                    editText.setText("");
+                if (enteredChar == '\n') {
+                    editText.setTag("changed programatically");
+                    editText.setText("0");
+                    editText.setTag(null);
+
+                    editText.clearFocus();
+                    findViewById(R.id.solve_button).requestFocus();
+                    hideKeyboard();
+                    return;
+                } else if (enteredChar == ' ') {
+                    editText.setText("0");
                 } else if (!Character.isDigit(enteredChar)) {
                     editText.setText("");
                     return;
@@ -92,6 +123,8 @@ public class MainActivity extends AppCompatActivity {
                 if (nextId >= 0) {
                     EditText next = findViewById(nextId);
                     next.requestFocus();
+                } else {
+                    hideKeyboard();
                 }
 
             }
@@ -108,35 +141,61 @@ public class MainActivity extends AppCompatActivity {
     private void solveSudoku() {
         int[] puzzle = new int[Sudoku.DIMEN * Sudoku.DIMEN];
 
-        for (int i = 0; i < Sudoku.DIMEN * Sudoku.DIMEN; ++i) {
-            EditText cell = (EditText) mGridLayout.getChildAt(i);
-            String cellText = cell.getText().toString();
-            if (cellText.isEmpty()) {
-                puzzle[i] = 0;
-            } else {
-                int cellValue = Integer.parseInt(cellText);
-                puzzle[i] = cellValue;
+        for (int i = 0; i < Sudoku.DIMEN; ++i) {
+            TableRow row = (TableRow) mTableLayout.getChildAt(i);
+
+            for (int j = 0; j < Sudoku.DIMEN; ++j) {
+                EditText cell = (EditText) row.getChildAt(j);
+                String cellText = cell.getText().toString();
+                int index = i * Sudoku.DIMEN + j;
+
+                if (cellText.isEmpty()) {
+                    puzzle[index] = 0;
+                } else {
+                    int cellValue = Integer.parseInt(cellText);
+                    puzzle[index] = cellValue;
+                }
             }
         }
 
         Sudoku sudoku = new Sudoku(puzzle);
         sudoku.solve();
 
-        for (int i = 0; i < Sudoku.DIMEN * Sudoku.DIMEN; ++i) {
-            EditText cell = (EditText) mGridLayout.getChildAt(i);
-            if (sudoku.getPuzzleAt(i) == 0) {
-                cell.setText(String.valueOf(sudoku.getSolutionAt(i)));
-                cell.setTextColor(Color.RED);
+        for (int i = 0; i < Sudoku.DIMEN; ++i) {
+            TableRow row = (TableRow) mTableLayout.getChildAt(i);
+
+            for (int j = 0; j < Sudoku.DIMEN; ++j) {
+                EditText cell = (EditText) row.getChildAt(j);
+                int index = i * Sudoku.DIMEN + j;
+                if (sudoku.getPuzzleAt(index) == 0) {
+                    cell.setText(String.valueOf(sudoku.getSolutionAt(index)));
+                    cell.setTextColor(Color.RED);
+                }
             }
         }
     }
 
     private void resetGrid() {
-        for (int i = 0; i < Sudoku.DIMEN * Sudoku.DIMEN; ++i) {
-            EditText cell = (EditText) mGridLayout.getChildAt(i);
+        for (int i = 0; i < Sudoku.DIMEN; ++i) {
+            TableRow row = (TableRow) mTableLayout.getChildAt(i);
 
-            cell.setText("");
-            cell.setTextColor(Color.BLACK);
+            for (int j = 0; j < Sudoku.DIMEN; ++j) {
+                EditText cell = (EditText) row.getChildAt(j);
+                cell.setText("0");
+                cell.setTextColor(Color.BLACK);
+                cell.clearFocus();
+            }
         }
+    }
+
+    private void hideKeyboard() {
+        InputMethodManager imm = (InputMethodManager) this.getSystemService(AppCompatActivity.INPUT_METHOD_SERVICE);
+        //Find the currently focused view, so we can grab the correct window token from it.
+        View view = this.getCurrentFocus();
+        //If no view currently has focus, create a new one, just so we can grab a window token from it
+        if (view == null) {
+            view = new View(this);
+        }
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 }
