@@ -1,7 +1,9 @@
 package osellus.feng.gary.sudokusolver;
 
+import java.util.Arrays;
+
 public class Sudoku {
-    private static int DIMEN = 9;
+    public static int DIMEN = 9;
 
     private int[] puzzle;
     private int[] solution;
@@ -12,7 +14,15 @@ public class Sudoku {
         }
 
         this.puzzle = puzzle;
-        this.solution = puzzle;
+        this.solution = Arrays.copyOf(puzzle, DIMEN * DIMEN);
+    }
+
+    public int getPuzzleAt(int index) {
+        return puzzle[index];
+    }
+
+    public int getSolutionAt(int index) {
+        return solution[index];
     }
 
     public boolean solve() {
