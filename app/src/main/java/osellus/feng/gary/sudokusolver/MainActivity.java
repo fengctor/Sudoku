@@ -1,16 +1,13 @@
 package osellus.feng.gary.sudokusolver;
 
 import android.graphics.Color;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayout;
 import android.text.InputFilter;
 import android.text.InputType;
-import android.text.Spanned;
-import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -25,7 +22,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mGridLayout = findViewById(R.id.grid);
-        EditText lastEditText = null;
         int editTextId;
 
         for (int i = 0; i < 9; ++i) {
@@ -36,7 +32,6 @@ public class MainActivity extends AppCompatActivity {
                 editText.setId(editTextId);
 
                 mGridLayout.addView(editText, i);
-                //  lastEditText = editText;
             }
         }
 
@@ -47,6 +42,14 @@ public class MainActivity extends AppCompatActivity {
                 solveSudoku();
             }
         });
+
+        Button resetButton = findViewById(R.id.reset_button);
+        resetButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                resetGrid();
+            }
+        });
     }
 
     private EditText createBaseEditText() {
@@ -54,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
         editText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
         editText.setTextSize(14);
-        editText.setFilters(new InputFilter[] {new InputFilter.LengthFilter(EDIT_MAX_LEN)});
+        editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(EDIT_MAX_LEN)});
         GridLayout.LayoutParams layoutParams = new GridLayout.LayoutParams(GridLayout.spec(GridLayout.UNDEFINED, 1f), GridLayout.spec(GridLayout.UNDEFINED, 1f));
         layoutParams.setGravity(Gravity.CENTER);
         editText.setLayoutParams(layoutParams);
@@ -85,6 +88,15 @@ public class MainActivity extends AppCompatActivity {
                 cell.setText(String.valueOf(sudoku.getSolutionAt(i)));
                 cell.setTextColor(Color.RED);
             }
+        }
+    }
+
+    private void resetGrid() {
+        for (int i = 0; i < Sudoku.DIMEN * Sudoku.DIMEN; ++i) {
+            EditText cell = (EditText) mGridLayout.getChildAt(i);
+
+            cell.setText("");
+            cell.setTextColor(Color.BLACK);
         }
     }
 }
