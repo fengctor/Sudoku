@@ -1,10 +1,8 @@
 package osellus.feng.gary.sudokusolver;
 
-import android.content.Context;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.ViewUtils;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
@@ -32,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
         EditText prevEditText = null;
         int editTextId;
 
+        // set up Sudoku grid
         for (int i = 0; i < Sudoku.DIMEN; ++i) {
             TableRow row = new TableRow(this);
             for (int j = 0; j < Sudoku.DIMEN; ++j) {
@@ -69,11 +68,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 resetGrid();
-                resetButton.requestFocus();
             }
         });
     }
 
+    // Create a cell to add to a TableRow
     private EditText createBaseEditText() {
         final EditText editText = new EditText(this);
 
@@ -90,6 +89,7 @@ public class MainActivity extends AppCompatActivity {
         editText.setSelectAllOnFocus(true);
         editText.setGravity(Gravity.CENTER);
 
+        // Handle cell navigation
         editText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -113,17 +113,18 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 } else if (enteredChar == ' ') {
                     editText.setText("0");
+                    return;
                 } else if (!Character.isDigit(enteredChar)) {
                     editText.setText("");
                     return;
                 }
-
 
                 int nextId = editText.getNextFocusForwardId();
                 if (nextId >= 0) {
                     EditText next = findViewById(nextId);
                     next.requestFocus();
                 } else {
+                    editText.clearFocus();
                     hideKeyboard();
                 }
 
@@ -190,9 +191,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void hideKeyboard() {
         InputMethodManager imm = (InputMethodManager) this.getSystemService(AppCompatActivity.INPUT_METHOD_SERVICE);
-        //Find the currently focused view, so we can grab the correct window token from it.
         View view = this.getCurrentFocus();
-        //If no view currently has focus, create a new one, just so we can grab a window token from it
+
         if (view == null) {
             view = new View(this);
         }
