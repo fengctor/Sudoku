@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 char enteredChar = charSequence.charAt(0);
                 if (enteredChar == '\n') {
-                    editText.setTag("changed programatically");
+                    editText.setTag("changed programmatically");
                     editText.setText("0");
                     editText.setTag(null);
 
@@ -169,7 +169,9 @@ public class MainActivity extends AppCompatActivity {
                 EditText cell = (EditText) row.getChildAt(j);
                 int index = i * Sudoku.DIMEN + j;
                 if (sudoku.getPuzzleAt(index) == 0) {
+                    cell.setTag("changed programmatically");
                     cell.setText(String.valueOf(sudoku.getSolutionAt(index)));
+                    cell.setTag(null);
                     cell.setTextColor(Color.RED);
                 }
             }
@@ -182,7 +184,9 @@ public class MainActivity extends AppCompatActivity {
 
             for (int j = 0; j < Sudoku.DIMEN; ++j) {
                 EditText cell = (EditText) row.getChildAt(j);
+                cell.setTag("changed programmatically");
                 cell.setText("0");
+                cell.setTag(null);
                 cell.setTextColor(Color.BLACK);
                 cell.clearFocus();
             }
