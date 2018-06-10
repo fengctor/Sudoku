@@ -18,6 +18,7 @@ import android.widget.TableRow;
 
 public class MainActivity extends AppCompatActivity {
     private final int EDIT_MAX_LEN = 1;
+    private final int MARGIN_SIZE = 4;
 
     private TableLayout mTableLayout;
 
@@ -34,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < Sudoku.DIMEN; ++i) {
             TableRow row = new TableRow(this);
             for (int j = 0; j < Sudoku.DIMEN; ++j) {
-                EditText editText = createBaseEditText();
+                EditText editText = createEditText(i, j);
                 editTextId = View.generateViewId();
                 editText.setId(editTextId);
 
@@ -50,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     1);
+            setTableRowMargins(layoutParams, i);
             row.setLayoutParams(layoutParams);
 
             mTableLayout.addView(row, i);
@@ -73,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Create a cell to add to a TableRow
-    private EditText createBaseEditText() {
+    private EditText createEditText(int row, int col) {
         final EditText editText = new EditText(this);
 
         editText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
@@ -85,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 1);
+        setEditTextMargins(layoutParams, row, col);
         editText.setLayoutParams(layoutParams);
         editText.setSelectAllOnFocus(true);
         editText.setGravity(Gravity.CENTER);
@@ -137,6 +140,41 @@ public class MainActivity extends AppCompatActivity {
         });
 
         return editText;
+    }
+
+    private void setEditTextMargins(TableRow.LayoutParams layoutParams, int row, int col) {
+        int left = 0;
+        int top = 0;
+        int right = 0;
+        int bottom = 0;
+
+        if (col % 3 == 0) {
+            left = MARGIN_SIZE;
+        } else if (col % 9 == 8) {
+            right = MARGIN_SIZE;
+        }
+        if (row % 3 == 0) {
+            top = MARGIN_SIZE;
+        } else if (row % 9 == 8) {
+            bottom = MARGIN_SIZE;
+        }
+
+        layoutParams.setMargins(left, top, right, bottom);
+    }
+
+    private void setTableRowMargins(TableLayout.LayoutParams layoutParams, int row) {
+        int left = MARGIN_SIZE;
+        int top = 0;
+        int right = MARGIN_SIZE;
+        int bottom = 0;
+
+        if (row % 9 == 0) {
+            top = MARGIN_SIZE;
+        } else if (row % 9 == 8) {
+            bottom = MARGIN_SIZE;
+        }
+
+        layoutParams.setMargins(left, top, right, bottom);
     }
 
     private void solveSudoku() {
