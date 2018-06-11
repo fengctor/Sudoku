@@ -1,5 +1,7 @@
 package osellus.feng.gary.sudokusolver;
 
+import android.app.LoaderManager;
+import android.content.Loader;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -13,13 +15,16 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 
 public class MainActivity extends AppCompatActivity {
+    private final int SOLVE_SUDOKU_LOADER_ID = 0;
     private final int EDIT_MAX_LEN = 1;
     private final int MARGIN_SIZE = 4;
 
+    private ProgressBar mProgressBar;
     private TableLayout mTableLayout;
 
     @Override
@@ -27,7 +32,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mProgressBar = findViewById(R.id.progressBar);
         mTableLayout = findViewById(R.id.grid);
+
+        mProgressBar.setVisibility(View.GONE);
+
         EditText prevCell = null;
         int cellId;
 
@@ -61,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
         solveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                mProgressBar.setVisibility(View.VISIBLE);
                 solveSudoku();
             }
         });
@@ -197,12 +207,28 @@ public class MainActivity extends AppCompatActivity {
                     int cellValue = Integer.parseInt(cellText);
                     puzzle[index] = cellValue;
                 }
+
+                cell.setFocusableInTouchMode(false);
             }
         }
 
-        Sudoku sudoku = new Sudoku(puzzle);
-        sudoku.solve();
+        Bundle args = new Bundle();
+        args.putIntArray("puzzle", puzzle);
+        getLoaderManager().restartLoader(SOLVE_SUDOKU_LOADER_ID, args, new SudokuLoaderCallbacks<Sudoku>() {
+            @Override
+            public Loader<Sudoku> onCreateLoader(int id, Bundle args) {
+                return new SudokuLoader(MainActivity.this, new Sudoku(args.getIntArray("puzzle")));
+            }
 
+            @Override
+            public void onLoadFinished(Loader<Sudoku> loader, Sudoku data) {
+                mProgressBar.setVisibility(View.GONE);
+                displaySolution(data);
+            }
+        });
+    }
+
+    private void displaySolution(Sudoku sudoku) {
         for (int i = 0; i < Sudoku.DIMEN; ++i) {
             TableRow row = (TableRow) mTableLayout.getChildAt(i);
 
@@ -213,6 +239,8 @@ public class MainActivity extends AppCompatActivity {
                     setTextProgrammatically(cell, String.valueOf(sudoku.getSolutionAt(index)));
                     cell.setTextColor(Color.RED);
                 }
+
+                cell.setFocusableInTouchMode(true);
             }
         }
     }
@@ -238,5 +266,12 @@ public class MainActivity extends AppCompatActivity {
             view = new View(this);
         }
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+    }
+
+
+    public abstract class SudokuLoaderCallbacks<Sudoku> implements LoaderManager.LoaderCallbacks<Sudoku> {
+        @Override
+        public void onLoaderReset(Loader<Sudoku> loader) {
+        }
     }
 }
