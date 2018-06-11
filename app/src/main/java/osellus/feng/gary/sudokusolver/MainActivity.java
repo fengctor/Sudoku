@@ -270,8 +270,6 @@ public class MainActivity extends AppCompatActivity {
                         setCellText(cell, String.valueOf(sudoku.getSolutionAt(index)));
                         cell.setTextColor(Color.RED);
                     }
-
-                    cell.setFocusableInTouchMode(true);
                 }
             }
         }
@@ -286,6 +284,7 @@ public class MainActivity extends AppCompatActivity {
                 setCellText(cell, "");
                 cell.setTextColor(Color.BLACK);
                 cell.clearFocus();
+                cell.setFocusableInTouchMode(true);
             }
         }
     }
