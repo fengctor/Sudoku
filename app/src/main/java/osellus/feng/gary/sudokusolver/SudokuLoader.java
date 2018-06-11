@@ -1,7 +1,7 @@
 package osellus.feng.gary.sudokusolver;
 
-import android.content.AsyncTaskLoader;
 import android.content.Context;
+import android.support.v4.content.AsyncTaskLoader;
 
 public class SudokuLoader extends AsyncTaskLoader<Sudoku> {
     Sudoku sudoku;

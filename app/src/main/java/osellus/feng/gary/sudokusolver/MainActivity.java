@@ -1,10 +1,10 @@
 package osellus.feng.gary.sudokusolver;
 
-import android.app.LoaderManager;
-import android.content.Loader;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.InputFilter;
@@ -226,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
 
         Bundle args = new Bundle();
         args.putIntArray("puzzle", puzzle);
-        getLoaderManager().restartLoader(SOLVE_SUDOKU_LOADER_ID, args, new SudokuLoaderCallbacks<Sudoku>() {
+        getSupportLoaderManager().restartLoader(SOLVE_SUDOKU_LOADER_ID, args, new SudokuLoaderCallbacks<Sudoku>() {
             @Override
             public Loader<Sudoku> onCreateLoader(int id, Bundle args) {
                 return new SudokuLoader(MainActivity.this, new Sudoku(args.getIntArray("puzzle")));
