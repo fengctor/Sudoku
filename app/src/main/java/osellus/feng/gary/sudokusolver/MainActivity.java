@@ -28,28 +28,28 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mTableLayout = findViewById(R.id.grid);
-        EditText prevEditText = null;
-        int editTextId;
+        EditText prevCell = null;
+        int cellId;
 
         // set up Sudoku grid
         for (int i = 0; i < Sudoku.DIMEN; ++i) {
             TableRow row = new TableRow(this);
             for (int j = 0; j < Sudoku.DIMEN; ++j) {
-                EditText editText = createEditText(i, j);
-                editTextId = View.generateViewId();
-                editText.setId(editTextId);
+                EditText cell = createCell(i, j);
+                cellId = View.generateViewId();
+                cell.setId(cellId);
 
-                if (prevEditText != null) {
-                    prevEditText.setNextFocusForwardId(editTextId);
+                if (prevCell != null) {
+                    prevCell.setNextFocusForwardId(cellId);
                 }
 
-                prevEditText = editText;
-                row.addView(editText, j);
+                prevCell = cell;
+                row.addView(cell, j);
             }
 
             TableLayout.LayoutParams layoutParams = new TableLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    0,
                     1);
             setTableRowMargins(layoutParams, i);
             row.setLayoutParams(layoutParams);
@@ -75,25 +75,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Create a cell to add to a TableRow
-    private EditText createEditText(int row, int col) {
-        final EditText editText = new EditText(this);
+    private EditText createCell(int row, int col) {
+        final EditText cell = new EditText(this);
 
-        editText.setRawInputType(InputType.TYPE_CLASS_NUMBER);
-        editText.setText("0");
-        editText.setTextSize(14);
-        editText.setFilters(new InputFilter[]{new InputFilter.LengthFilter(EDIT_MAX_LEN)});
-        editText.setBackgroundResource(R.drawable.border_white);
+        cell.setRawInputType(InputType.TYPE_CLASS_NUMBER);
+        cell.setText("");
+        cell.setTextSize(14);
+        cell.setFilters(new InputFilter[]{new InputFilter.LengthFilter(EDIT_MAX_LEN)});
+        cell.setBackgroundResource(R.drawable.border_white);
         TableRow.LayoutParams layoutParams = new TableRow.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
+                0,
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 1);
-        setEditTextMargins(layoutParams, row, col);
-        editText.setLayoutParams(layoutParams);
-        editText.setSelectAllOnFocus(true);
-        editText.setGravity(Gravity.CENTER);
+        setCellMargins(layoutParams, row, col);
+        cell.setLayoutParams(layoutParams);
+        cell.setSelectAllOnFocus(true);
+        cell.setGravity(Gravity.CENTER);
 
         // Handle cell navigation
-        editText.addTextChangedListener(new TextWatcher() {
+        cell.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
 
@@ -101,33 +101,30 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
-                if (charSequence.length() == 0 || editText.getTag() != null) {
+                if (charSequence.length() == 0 || cell.getTag() != null) {
                     return;
                 }
                 char enteredChar = charSequence.charAt(0);
                 if (enteredChar == '\n') {
-                    editText.setTag("changed programmatically");
-                    editText.setText("0");
-                    editText.setTag(null);
+                    setTextProgrammatically(cell, "");
 
-                    editText.clearFocus();
+                    cell.clearFocus();
                     findViewById(R.id.solve_button).requestFocus();
                     hideKeyboard();
                     return;
-                } else if (enteredChar == ' ') {
-                    editText.setText("0");
-                    return;
+                } else if (enteredChar == ' ' || enteredChar == '0') {
+                    setTextProgrammatically(cell, "");
                 } else if (!Character.isDigit(enteredChar)) {
-                    editText.setText("");
+                    cell.setText("");
                     return;
                 }
 
-                int nextId = editText.getNextFocusForwardId();
+                int nextId = cell.getNextFocusForwardId();
                 if (nextId >= 0) {
                     EditText next = findViewById(nextId);
                     next.requestFocus();
                 } else {
-                    editText.clearFocus();
+                    cell.clearFocus();
                     hideKeyboard();
                 }
 
@@ -139,10 +136,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        return editText;
+        return cell;
     }
 
-    private void setEditTextMargins(TableRow.LayoutParams layoutParams, int row, int col) {
+    private void setTextProgrammatically(EditText editText, String text) {
+        editText.setTag("changed programmatically");
+        editText.setText(text);
+        editText.setTag(null);
+    }
+
+    private void setCellMargins(TableRow.LayoutParams layoutParams, int row, int col) {
         int left = 0;
         int top = 0;
         int right = 0;
@@ -207,9 +210,7 @@ public class MainActivity extends AppCompatActivity {
                 EditText cell = (EditText) row.getChildAt(j);
                 int index = i * Sudoku.DIMEN + j;
                 if (sudoku.getPuzzleAt(index) == 0) {
-                    cell.setTag("changed programmatically");
-                    cell.setText(String.valueOf(sudoku.getSolutionAt(index)));
-                    cell.setTag(null);
+                    setTextProgrammatically(cell, String.valueOf(sudoku.getSolutionAt(index)));
                     cell.setTextColor(Color.RED);
                 }
             }
@@ -222,9 +223,7 @@ public class MainActivity extends AppCompatActivity {
 
             for (int j = 0; j < Sudoku.DIMEN; ++j) {
                 EditText cell = (EditText) row.getChildAt(j);
-                cell.setTag("changed programmatically");
-                cell.setText("0");
-                cell.setTag(null);
+                setTextProgrammatically(cell, "");
                 cell.setTextColor(Color.BLACK);
                 cell.clearFocus();
             }
