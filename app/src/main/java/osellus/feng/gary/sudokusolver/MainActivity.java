@@ -11,19 +11,23 @@ import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TableLayout;
 import android.widget.TableRow;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
-    private final int SOLVE_SUDOKU_LOADER_ID = 0;
-    private final int CELL_MAX_LEN = 1;
-    private final int MARGIN_SIZE = 4;
+    private static final int SOLVE_SUDOKU_LOADER_ID = 0;
+    private static final int CELL_MAX_LEN = 1;
+    private static final int CELL_TEXT_SIZE = 14;
+    private static final int MARGIN_SIZE = 4;
 
     private ProgressBar mProgressBar;
     private TableLayout mTableLayout;
@@ -59,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
     }
     
     
-    //-----------------------------------SUDOKU GRID BORDER SETUP-----------------------------------
+    //--------------------------SUDOKU GRID BORDER SETUP--------------------------------------------
 
 
     private void setUpSudokuGrid() {
@@ -127,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    //-----------------------------------------CELL METHODS-----------------------------------------
+    //--------------------------CELL METHODS--------------------------------------------------------
 
     
     private EditText createCell(int row, int col) {
@@ -135,7 +139,7 @@ public class MainActivity extends AppCompatActivity {
 
         cell.setRawInputType(InputType.TYPE_CLASS_NUMBER);
         cell.setText("");
-        cell.setTextSize(14);
+        cell.setTextSize(CELL_TEXT_SIZE);
         cell.setFilters(new InputFilter[]{new InputFilter.LengthFilter(CELL_MAX_LEN)});
         cell.setBackgroundResource(R.drawable.border_white);
         TableRow.LayoutParams layoutParams = new TableRow.LayoutParams(
@@ -147,10 +151,24 @@ public class MainActivity extends AppCompatActivity {
         cell.setSelectAllOnFocus(true);
         cell.setGravity(Gravity.CENTER);
 
-        // Handle cell navigation
+        // handle cell navigation
+
+        cell.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_NULL || event.getKeyCode() == KeyEvent.FLAG_EDITOR_ACTION) {
+                    v.clearFocus();
+                    findViewById(R.id.solve_button).requestFocus();
+                    hideKeyboard();
+                    return true;
+                }
+                return false;
+            }
+        });
+
         cell.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+            public void beforeTextChanged(CharSequence charSequence, int start, int count, int after) {
 
             }
 
@@ -159,15 +177,10 @@ public class MainActivity extends AppCompatActivity {
                 if (charSequence.length() == 0 || cell.getTag() != null) {
                     return;
                 }
-                char enteredChar = charSequence.charAt(0);
-                if (enteredChar == '\n') {
-                    setCellText(cell, "");
 
-                    cell.clearFocus();
-                    findViewById(R.id.solve_button).requestFocus();
-                    hideKeyboard();
-                    return;
-                } else if (enteredChar == ' ' || enteredChar == '0') {
+                char enteredChar = charSequence.charAt(0);
+
+                if (enteredChar == ' ' || enteredChar == '0') {
                     setCellText(cell, "");
                 } else if (!Character.isDigit(enteredChar)) {
                     cell.setText("");
@@ -175,6 +188,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 int nextId = cell.getNextFocusForwardId();
+
                 if (nextId >= 0) {
                     EditText next = findViewById(nextId);
                     next.requestFocus();
@@ -201,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    //-----------------------------------SUDOKU GRID MANIPULATION-----------------------------------
+    //--------------------------SUDOKU GRID MANIPULATION--------------------------------------------
 
     
     private void solveSudoku() {
@@ -292,7 +306,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    //--------------------------------------------OTHER---------------------------------------------
+    //--------------------------OTHER---------------------------------------------------------------
 
 
     private void hideKeyboard() {
