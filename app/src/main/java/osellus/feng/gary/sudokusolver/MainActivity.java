@@ -38,34 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
         mProgressBar.setVisibility(View.GONE);
 
-        EditText prevCell = null;
-        int cellId;
-
-        // set up Sudoku grid
-        for (int i = 0; i < Sudoku.DIMEN; ++i) {
-            TableRow row = new TableRow(this);
-            for (int j = 0; j < Sudoku.DIMEN; ++j) {
-                EditText cell = createCell(i, j);
-                cellId = View.generateViewId();
-                cell.setId(cellId);
-
-                if (prevCell != null) {
-                    prevCell.setNextFocusForwardId(cellId);
-                }
-
-                prevCell = cell;
-                row.addView(cell, j);
-            }
-
-            TableLayout.LayoutParams layoutParams = new TableLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    0,
-                    1);
-            setTableRowMargins(layoutParams, i);
-            row.setLayoutParams(layoutParams);
-
-            mTableLayout.addView(row, i);
-        }
+        setUpSudokuGrid();
 
         Button solveButton = findViewById(R.id.solve_button);
         solveButton.setOnClickListener(new View.OnClickListener() {
@@ -88,6 +61,35 @@ public class MainActivity extends AppCompatActivity {
     
     //-----------------------------------SUDOKU GRID BORDER SETUP-----------------------------------
 
+
+    private void setUpSudokuGrid() {
+        EditText prevCell = null;
+
+        for (int i = 0; i < Sudoku.DIMEN; ++i) {
+            TableRow row = new TableRow(this);
+            for (int j = 0; j < Sudoku.DIMEN; ++j) {
+                EditText cell = createCell(i, j);
+                int cellId = View.generateViewId();
+                cell.setId(cellId);
+
+                if (prevCell != null) {
+                    prevCell.setNextFocusForwardId(cellId);
+                }
+
+                prevCell = cell;
+                row.addView(cell, j);
+            }
+
+            TableLayout.LayoutParams layoutParams = new TableLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    0,
+                    1);
+            setTableRowMargins(layoutParams, i);
+            row.setLayoutParams(layoutParams);
+
+            mTableLayout.addView(row, i);
+        }
+    }
 
     private void setCellMargins(TableRow.LayoutParams layoutParams, int row, int col) {
         int left = 0;
