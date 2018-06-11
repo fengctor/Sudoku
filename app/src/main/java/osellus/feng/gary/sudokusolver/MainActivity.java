@@ -4,6 +4,7 @@ import android.app.LoaderManager;
 import android.content.Loader;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.text.InputFilter;
@@ -21,7 +22,7 @@ import android.widget.TableRow;
 
 public class MainActivity extends AppCompatActivity {
     private final int SOLVE_SUDOKU_LOADER_ID = 0;
-    private final int EDIT_MAX_LEN = 1;
+    private final int CELL_MAX_LEN = 1;
     private final int MARGIN_SIZE = 4;
 
     private ProgressBar mProgressBar;
@@ -83,77 +84,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+    
+    
+    //-----------------------------------SUDOKU GRID BORDER SETUP-----------------------------------
 
-    // Create a cell to add to a TableRow
-    private EditText createCell(int row, int col) {
-        final EditText cell = new EditText(this);
-
-        cell.setRawInputType(InputType.TYPE_CLASS_NUMBER);
-        cell.setText("");
-        cell.setTextSize(14);
-        cell.setFilters(new InputFilter[]{new InputFilter.LengthFilter(EDIT_MAX_LEN)});
-        cell.setBackgroundResource(R.drawable.border_white);
-        TableRow.LayoutParams layoutParams = new TableRow.LayoutParams(
-                0,
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                1);
-        setCellMargins(layoutParams, row, col);
-        cell.setLayoutParams(layoutParams);
-        cell.setSelectAllOnFocus(true);
-        cell.setGravity(Gravity.CENTER);
-
-        // Handle cell navigation
-        cell.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
-                if (charSequence.length() == 0 || cell.getTag() != null) {
-                    return;
-                }
-                char enteredChar = charSequence.charAt(0);
-                if (enteredChar == '\n') {
-                    setTextProgrammatically(cell, "");
-
-                    cell.clearFocus();
-                    findViewById(R.id.solve_button).requestFocus();
-                    hideKeyboard();
-                    return;
-                } else if (enteredChar == ' ' || enteredChar == '0') {
-                    setTextProgrammatically(cell, "");
-                } else if (!Character.isDigit(enteredChar)) {
-                    cell.setText("");
-                    return;
-                }
-
-                int nextId = cell.getNextFocusForwardId();
-                if (nextId >= 0) {
-                    EditText next = findViewById(nextId);
-                    next.requestFocus();
-                } else {
-                    cell.clearFocus();
-                    hideKeyboard();
-                }
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
-
-        return cell;
-    }
-
-    private void setTextProgrammatically(EditText editText, String text) {
-        editText.setTag("changed programmatically");
-        editText.setText(text);
-        editText.setTag(null);
-    }
 
     private void setCellMargins(TableRow.LayoutParams layoutParams, int row, int col) {
         int left = 0;
@@ -190,6 +124,84 @@ public class MainActivity extends AppCompatActivity {
         layoutParams.setMargins(left, top, right, bottom);
     }
 
+
+    //-----------------------------------------CELL METHODS-----------------------------------------
+
+    
+    private EditText createCell(int row, int col) {
+        final EditText cell = new EditText(this);
+
+        cell.setRawInputType(InputType.TYPE_CLASS_NUMBER);
+        cell.setText("");
+        cell.setTextSize(14);
+        cell.setFilters(new InputFilter[]{new InputFilter.LengthFilter(CELL_MAX_LEN)});
+        cell.setBackgroundResource(R.drawable.border_white);
+        TableRow.LayoutParams layoutParams = new TableRow.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                1);
+        setCellMargins(layoutParams, row, col);
+        cell.setLayoutParams(layoutParams);
+        cell.setSelectAllOnFocus(true);
+        cell.setGravity(Gravity.CENTER);
+
+        // Handle cell navigation
+        cell.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int start, int before, int count) {
+                if (charSequence.length() == 0 || cell.getTag() != null) {
+                    return;
+                }
+                char enteredChar = charSequence.charAt(0);
+                if (enteredChar == '\n') {
+                    setCellText(cell, "");
+
+                    cell.clearFocus();
+                    findViewById(R.id.solve_button).requestFocus();
+                    hideKeyboard();
+                    return;
+                } else if (enteredChar == ' ' || enteredChar == '0') {
+                    setCellText(cell, "");
+                } else if (!Character.isDigit(enteredChar)) {
+                    cell.setText("");
+                    return;
+                }
+
+                int nextId = cell.getNextFocusForwardId();
+                if (nextId >= 0) {
+                    EditText next = findViewById(nextId);
+                    next.requestFocus();
+                } else {
+                    cell.clearFocus();
+                    hideKeyboard();
+                }
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+
+        return cell;
+    }
+
+    private void setCellText(EditText editText, String text) {
+        editText.setTag("changed programmatically");
+        editText.setText(text);
+        editText.setTag(null);
+    }
+
+
+    //-----------------------------------SUDOKU GRID MANIPULATION-----------------------------------
+
+    
     private void solveSudoku() {
         int[] puzzle = new int[Sudoku.DIMEN * Sudoku.DIMEN];
 
@@ -229,18 +241,38 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void displaySolution(Sudoku sudoku) {
-        for (int i = 0; i < Sudoku.DIMEN; ++i) {
-            TableRow row = (TableRow) mTableLayout.getChildAt(i);
+        if (!sudoku.hasSolution()) {
+            Snackbar.make(findViewById(android.R.id.content), R.string.no_solution, Snackbar.LENGTH_LONG)
+                    .setAction(R.string.dismiss, new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            // Simply dismiss the message
+                        }
+                    })
+                    .show();
 
-            for (int j = 0; j < Sudoku.DIMEN; ++j) {
-                EditText cell = (EditText) row.getChildAt(j);
-                int index = i * Sudoku.DIMEN + j;
-                if (sudoku.getPuzzleAt(index) == 0) {
-                    setTextProgrammatically(cell, String.valueOf(sudoku.getSolutionAt(index)));
-                    cell.setTextColor(Color.RED);
+            for (int i = 0; i < Sudoku.DIMEN; ++i) {
+                TableRow row = (TableRow) mTableLayout.getChildAt(i);
+
+                for (int j = 0; j < Sudoku.DIMEN; ++j) {
+                    EditText cell = (EditText) row.getChildAt(j);
+                    cell.setFocusableInTouchMode(true);
                 }
+            }
+        } else {
+            for (int i = 0; i < Sudoku.DIMEN; ++i) {
+                TableRow row = (TableRow) mTableLayout.getChildAt(i);
 
-                cell.setFocusableInTouchMode(true);
+                for (int j = 0; j < Sudoku.DIMEN; ++j) {
+                    EditText cell = (EditText) row.getChildAt(j);
+                    int index = i * Sudoku.DIMEN + j;
+                    if (sudoku.getPuzzleAt(index) == 0) {
+                        setCellText(cell, String.valueOf(sudoku.getSolutionAt(index)));
+                        cell.setTextColor(Color.RED);
+                    }
+
+                    cell.setFocusableInTouchMode(true);
+                }
             }
         }
     }
@@ -251,12 +283,16 @@ public class MainActivity extends AppCompatActivity {
 
             for (int j = 0; j < Sudoku.DIMEN; ++j) {
                 EditText cell = (EditText) row.getChildAt(j);
-                setTextProgrammatically(cell, "");
+                setCellText(cell, "");
                 cell.setTextColor(Color.BLACK);
                 cell.clearFocus();
             }
         }
     }
+
+
+    //--------------------------------------------OTHER---------------------------------------------
+
 
     private void hideKeyboard() {
         InputMethodManager imm = (InputMethodManager) this.getSystemService(AppCompatActivity.INPUT_METHOD_SERVICE);

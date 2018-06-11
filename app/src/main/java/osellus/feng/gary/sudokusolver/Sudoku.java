@@ -7,6 +7,7 @@ public class Sudoku {
 
     private int[] puzzle;
     private int[] solution;
+    private boolean solved;
 
     public Sudoku(int[] puzzle) {
         if (puzzle == null || puzzle.length != DIMEN * DIMEN) {
@@ -25,6 +26,10 @@ public class Sudoku {
         return solution[index];
     }
 
+    public boolean hasSolution() {
+        return solved;
+    }
+
     public boolean solve() {
         return solveFrom(0);
     }
@@ -32,6 +37,7 @@ public class Sudoku {
     private boolean solveFrom(int index) {
         int cur = firstEmptyFrom(index);
         if (cur < 0) {
+            solved = true;
             return true;
         }
 
@@ -45,6 +51,7 @@ public class Sudoku {
             }
         }
         solution[cur] = 0;
+        solved = false;
         return false;
     }
 

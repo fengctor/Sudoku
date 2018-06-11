@@ -2,4 +2,6 @@
     <string name="app_name">SudokuSolver</string>
     <string name="solve_button">Solve!</string>
     <string name="reset_button">Reset Grid</string>
+    <string name="no_solution">This Sudoku has no solution.</string>
+    <string name="dismiss">Dismiss</string>
 </resources>
