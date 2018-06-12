@@ -3,6 +3,7 @@ package osellus.feng.gary.sudokusolver;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.LoaderManager;
@@ -24,7 +25,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TableLayout;
@@ -35,10 +35,11 @@ public class MainActivity extends AppCompatActivity {
     private static final int SOLVE_SUDOKU_LOADER_ID = 0;
     private static final int CELL_MAX_LEN = 1;
     private static final int CELL_TEXT_SIZE = 14;
-    private static final int MARGIN_SIZE = 4;
+    private static final int THICKER_BORDER_MARGIN = 4;
 
     private ProgressBar mProgressBar;
     private TableLayout mTableLayout;
+    private SwipeRefreshLayout mSwipeRefresh;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,13 +59,13 @@ public class MainActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setTitle(R.string.app_name);
 
-        final SwipeRefreshLayout swipeRefresh = findViewById(R.id.swipeRefresh);
-        swipeRefresh.setOnRefreshListener(
+        mSwipeRefresh = findViewById(R.id.swipeRefresh);
+        mSwipeRefresh.setOnRefreshListener(
                 new SwipeRefreshLayout.OnRefreshListener() {
                     @Override
                     public void onRefresh() {
                         resetGrid();
-                        swipeRefresh.setRefreshing(false);
+                        mSwipeRefresh.setRefreshing(false);
                     }
                 }
         );
@@ -120,29 +121,29 @@ public class MainActivity extends AppCompatActivity {
         int bottom = 0;
 
         if (col % 3 == 0) {
-            left = MARGIN_SIZE;
+            left = THICKER_BORDER_MARGIN;
         } else if (col % 9 == 8) {
-            right = MARGIN_SIZE;
+            right = THICKER_BORDER_MARGIN;
         }
         if (row % 3 == 0) {
-            top = MARGIN_SIZE;
+            top = THICKER_BORDER_MARGIN;
         } else if (row % 9 == 8) {
-            bottom = MARGIN_SIZE;
+            bottom = THICKER_BORDER_MARGIN;
         }
 
         layoutParams.setMargins(left, top, right, bottom);
     }
 
     private void setTableRowMargins(TableLayout.LayoutParams layoutParams, int row) {
-        int left = MARGIN_SIZE;
+        int left = THICKER_BORDER_MARGIN;
         int top = 0;
-        int right = MARGIN_SIZE;
+        int right = THICKER_BORDER_MARGIN;
         int bottom = 0;
 
         if (row % 9 == 0) {
-            top = MARGIN_SIZE;
+            top = THICKER_BORDER_MARGIN;
         } else if (row % 9 == 8) {
-            bottom = MARGIN_SIZE;
+            bottom = THICKER_BORDER_MARGIN;
         }
 
         layoutParams.setMargins(left, top, right, bottom);
@@ -342,7 +343,15 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.resetButton:
                 hideKeyboard();
-                resetGrid();
+
+                mSwipeRefresh.setRefreshing(true);
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        resetGrid();
+                        mSwipeRefresh.setRefreshing(false);
+                    }
+                }, 500);
                 return true;
 
             case R.id.solveButton:

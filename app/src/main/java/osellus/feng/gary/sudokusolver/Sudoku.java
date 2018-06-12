@@ -5,13 +5,15 @@ import java.util.Arrays;
 public class Sudoku {
     public static int DIMEN = 9;
 
+    private static String INVALID_PUZZLE = "invalid puzzle";
+
     private int[] puzzle;
     private int[] solution;
     private boolean solved;
 
     public Sudoku(int[] puzzle) {
         if (puzzle == null || puzzle.length != DIMEN * DIMEN) {
-            throw new IllegalArgumentException("Invalid puzzle");
+            throw new IllegalArgumentException(INVALID_PUZZLE);
         }
 
         this.puzzle = puzzle;
@@ -41,11 +43,7 @@ public class Sudoku {
     }
 
     public boolean solve() {
-        return solveFrom(0);
-    }
-
-    private boolean solveFrom(int index) {
-        int cur = firstEmptyFrom(index);
+        int cur = leastChoicesEmptyCell();
         if (cur < 0) {
             solved = true;
             return true;
@@ -54,7 +52,7 @@ public class Sudoku {
         for (int i = 1; i <= DIMEN; ++i) {
             solution[cur] = i;
             if (validChoice(cur)) {
-                boolean solved = solveFrom(getIndex(cur / DIMEN, cur % DIMEN));
+                boolean solved = solve();
                 if (solved) {
                     return true;
                 }
@@ -140,6 +138,41 @@ public class Sudoku {
         }
 
         return -1;
+    }
+
+    private int getPossibleChoices(int index) {
+        if (solution[index] != 0) {
+            return -1;
+        }
+
+        int count = 0;
+
+        for (int i = 1; i <= DIMEN; ++i) {
+            solution[index] = i;
+            if (validChoice(index)) {
+                ++count;
+            }
+        }
+
+        solution[index] = 0;
+        return count;
+    }
+
+    private int leastChoicesEmptyCell() {
+        int index = -1;
+        int minChoicesSoFar = DIMEN;
+
+        for (int i = 0; i < DIMEN * DIMEN; ++i) {
+            if (solution[i] == 0) {
+                int numPossibleChoices = getPossibleChoices(i);
+                if (numPossibleChoices < minChoicesSoFar) {
+                    minChoicesSoFar = numPossibleChoices;
+                    index = i;
+                }
+            }
+        }
+
+        return index;
     }
 
     public void printSolution() {
