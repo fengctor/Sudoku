@@ -22,6 +22,16 @@ public class Sudoku {
         return puzzle[index];
     }
 
+    // if the initial puzzle is not valid, it cannot have a solution
+    public boolean mayHaveSolution() {
+        for (int i = 0; i < DIMEN * DIMEN; ++i) {
+            if (!validChoice(i)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     public int getSolutionAt(int index) {
         return solution[index];
     }

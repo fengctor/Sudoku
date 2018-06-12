@@ -19,7 +19,9 @@ public class SudokuLoader extends AsyncTaskLoader<Sudoku> {
 
     @Override
     public Sudoku loadInBackground() {
-        sudoku.solve();
+        if (sudoku.mayHaveSolution()) {
+            sudoku.solve();
+        }
         return sudoku;
     }
 }

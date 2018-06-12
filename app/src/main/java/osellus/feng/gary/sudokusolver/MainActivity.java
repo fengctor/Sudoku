@@ -1,17 +1,25 @@
 package osellus.feng.gary.sudokusolver;
 
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
+import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -44,20 +52,30 @@ public class MainActivity extends AppCompatActivity {
 
         setUpSudokuGrid();
 
-        Button solveButton = findViewById(R.id.solve_button);
-        solveButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mProgressBar.setVisibility(View.VISIBLE);
-                solveSudoku();
-            }
-        });
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
 
-        final Button resetButton = findViewById(R.id.reset_button);
-        resetButton.setOnClickListener(new View.OnClickListener() {
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setTitle(R.string.app_name);
+
+        final SwipeRefreshLayout swipeRefresh = findViewById(R.id.swipeRefresh);
+        swipeRefresh.setOnRefreshListener(
+                new SwipeRefreshLayout.OnRefreshListener() {
+                    @Override
+                    public void onRefresh() {
+                        resetGrid();
+                        swipeRefresh.setRefreshing(false);
+                    }
+                }
+        );
+
+        final ConstraintLayout constraintLayout = findViewById(R.id.layout);
+        constraintLayout.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override
-            public void onClick(View view) {
-                resetGrid();
+            public void onFocusChange(View v, boolean hasFocus) {
+                if (hasFocus) {
+                    hideKeyboard();
+                }
             }
         });
     }
@@ -157,9 +175,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_NULL || event.getKeyCode() == KeyEvent.FLAG_EDITOR_ACTION) {
-                    v.clearFocus();
-                    findViewById(R.id.solve_button).requestFocus();
                     hideKeyboard();
+                    v.clearFocus();
                     return true;
                 }
                 return false;
@@ -284,11 +301,14 @@ public class MainActivity extends AppCompatActivity {
                     int index = i * Sudoku.DIMEN + j;
                     if (sudoku.getPuzzleAt(index) == 0) {
                         setCellText(cell, String.valueOf(sudoku.getSolutionAt(index)));
-                        cell.setTextColor(Color.RED);
+                        cell.setTextColor(Color.BLUE);
+                        cell.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
                     }
                 }
             }
         }
+
+        findViewById(R.id.layout).requestFocus();
     }
 
     private void resetGrid() {
@@ -299,9 +319,40 @@ public class MainActivity extends AppCompatActivity {
                 EditText cell = (EditText) row.getChildAt(j);
                 setCellText(cell, "");
                 cell.setTextColor(Color.BLACK);
+                cell.setTypeface(null);
                 cell.clearFocus();
                 cell.setFocusableInTouchMode(true);
             }
+        }
+    }
+
+
+    //--------------------------OPTIONS MENU--------------------------------------------------------
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.my_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.resetButton:
+                hideKeyboard();
+                resetGrid();
+                return true;
+
+            case R.id.solveButton:
+                hideKeyboard();
+                mProgressBar.setVisibility(View.VISIBLE);
+                solveSudoku();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
         }
     }
 

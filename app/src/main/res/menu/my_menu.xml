@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/resetButton"
+        android:icon="@drawable/ic_refresh"
+        android:title="@string/reset_button"
+        app:showAsAction="ifRoom"/>
+    <item
+        android:id="@+id/solveButton"
+        android:icon="@drawable/ic_grid"
+        android:title="@string/solve_button"
+        app:showAsAction="always"/>
+</menu>
