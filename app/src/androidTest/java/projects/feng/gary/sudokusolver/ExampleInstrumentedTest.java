@@ -1,4 +1,4 @@
-package osellus.feng.gary.sudokusolver;
+package projects.feng.gary.sudokusolver;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

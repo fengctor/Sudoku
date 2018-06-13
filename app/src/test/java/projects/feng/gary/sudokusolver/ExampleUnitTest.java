@@ -1,4 +1,4 @@
-package osellus.feng.gary.sudokusolver;
+package projects.feng.gary.sudokusolver;
 
 import org.junit.Test;
 

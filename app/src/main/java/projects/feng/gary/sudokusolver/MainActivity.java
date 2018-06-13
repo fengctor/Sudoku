@@ -1,4 +1,4 @@
-package osellus.feng.gary.sudokusolver;
+package projects.feng.gary.sudokusolver;
 
 import android.graphics.Color;
 import android.graphics.Typeface;
