@@ -160,7 +160,7 @@ public class Sudoku {
 
     private int leastChoicesEmptyCell() {
         int index = -1;
-        int minChoicesSoFar = DIMEN;
+        int minChoicesSoFar = DIMEN + 1;
 
         for (int i = 0; i < DIMEN * DIMEN; ++i) {
             if (solution[i] == 0) {
