@@ -86,8 +86,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-    
-    
+
+
     //--------------------------SUDOKU GRID BORDER SETUP--------------------------------------------
 
 
@@ -123,7 +123,14 @@ public class MainActivity extends AppCompatActivity {
                     prevCell.setNextFocusForwardId(cellId);
                 }
 
+                if (i > 0) {
+                    TableRow upRow = (TableRow) mTableLayout.getChildAt(i - 1);
+                    EditText upCell = (EditText) upRow.getChildAt(j);
+                    upCell.setNextFocusDownId(cellId);
+                }
+
                 prevCell = cell;
+
                 row.addView(cell, j);
             }
 
@@ -176,7 +183,7 @@ public class MainActivity extends AppCompatActivity {
 
     //--------------------------CELL METHODS--------------------------------------------------------
 
-    
+
     private EditText createCell(int row, int col) {
         final EditText cell = new EditText(this);
 
@@ -200,9 +207,15 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if (actionId == EditorInfo.IME_NULL || event.getKeyCode() == KeyEvent.FLAG_EDITOR_ACTION) {
-                    hideKeyboard();
+                    int downId = v.getNextFocusDownId();
+                    if (downId >= 0) {
+                        EditText down = findViewById(downId);
+                        down.requestFocus();
+                        return true;
+                    }
+
                     v.clearFocus();
-                    return true;
+                    hideKeyboard();
                 }
                 return false;
             }
@@ -259,7 +272,7 @@ public class MainActivity extends AppCompatActivity {
 
     //--------------------------SUDOKU GRID MANIPULATION--------------------------------------------
 
-    
+
     private void solveSudoku() {
         int[] puzzle = new int[Sudoku.DIMEN * Sudoku.DIMEN];
 
