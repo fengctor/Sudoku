@@ -1,10 +1,12 @@
 package projects.feng.gary.sudokusolver;
 
 import android.graphics.Color;
+import android.graphics.Point;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.constraint.ConstraintLayout;
+import android.support.constraint.ConstraintSet;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -16,6 +18,7 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.view.Display;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -36,7 +39,9 @@ public class MainActivity extends AppCompatActivity {
     private static final int CELL_MAX_LEN = 1;
     private static final int CELL_TEXT_SIZE = 14;
     private static final int THICKER_BORDER_MARGIN = 4;
+    private static final int DEFAULT_MARGIN = 8;
 
+    private ConstraintLayout mConstraintLayout;
     private ProgressBar mProgressBar;
     private TableLayout mTableLayout;
     private SwipeRefreshLayout mSwipeRefresh;
@@ -46,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mConstraintLayout = findViewById(R.id.layout);
         mProgressBar = findViewById(R.id.progressBar);
         mTableLayout = findViewById(R.id.grid);
 
@@ -86,6 +92,24 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void setUpSudokuGrid() {
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+
+        // Grid should have around 1 cell of empty space to its right and left
+        int tableDim = (size.x < size.y ? size.x : size.y) * 9 / 11;
+        ConstraintLayout.LayoutParams constraintLayoutParams = new ConstraintLayout.LayoutParams(tableDim, tableDim);
+        constraintLayoutParams.setMargins(DEFAULT_MARGIN, DEFAULT_MARGIN, DEFAULT_MARGIN, DEFAULT_MARGIN);
+        mTableLayout.setLayoutParams(constraintLayoutParams);
+
+        ConstraintSet constraintSet = new ConstraintSet();
+        constraintSet.clone(mConstraintLayout);
+        constraintSet.connect(R.id.grid, ConstraintSet.LEFT, R.id.layout, ConstraintSet.LEFT);
+        constraintSet.connect(R.id.grid, ConstraintSet.TOP, R.id.layout, ConstraintSet.TOP);
+        constraintSet.connect(R.id.grid, ConstraintSet.RIGHT, R.id.layout, ConstraintSet.RIGHT);
+        constraintSet.connect(R.id.grid, ConstraintSet.BOTTOM, R.id.layout, ConstraintSet.BOTTOM);
+        constraintSet.applyTo(mConstraintLayout);
+
         EditText prevCell = null;
 
         for (int i = 0; i < Sudoku.DIMEN; ++i) {
