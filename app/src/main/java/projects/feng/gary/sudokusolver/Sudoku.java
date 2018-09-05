@@ -71,11 +71,8 @@ public class Sudoku {
         int row = index / DIMEN;
         int col = index % DIMEN;
         int curNum = solution[getIndex(row, col)];
-        if (curNum == 0) {
-            return true;
-        }
 
-        return validRow(row) && validCol(col) && validBox(row, col);
+        return curNum == 0 || (validRow(row) && validCol(col) && validBox(row, col));
     }
 
     private boolean validRow(int row) {
@@ -130,16 +127,6 @@ public class Sudoku {
         return true;
     }
 
-    private int firstEmptyFrom(int start) {
-        for (int i = start; i < DIMEN * DIMEN; ++i) {
-            if (solution[i] == 0) {
-                return i;
-            }
-        }
-
-        return -1;
-    }
-
     private int getPossibleChoices(int index) {
         if (solution[index] != 0) {
             return -1;
@@ -173,14 +160,5 @@ public class Sudoku {
         }
 
         return index;
-    }
-
-    public void printSolution() {
-        for (int i = 0; i < DIMEN * DIMEN; ++i) {
-            if (i % DIMEN == 0) {
-                System.out.println("");
-            }
-            System.out.print(solution[i]);
-        }
     }
 }

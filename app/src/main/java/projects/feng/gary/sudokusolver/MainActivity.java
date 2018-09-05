@@ -18,6 +18,7 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
 import android.text.TextWatcher;
+import android.util.TypedValue;
 import android.view.Display;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -189,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
 
         cell.setRawInputType(InputType.TYPE_CLASS_NUMBER);
         cell.setText("");
-        cell.setTextSize(CELL_TEXT_SIZE);
+        cell.setTextSize(TypedValue.COMPLEX_UNIT_DIP, CELL_TEXT_SIZE);
         cell.setFilters(new InputFilter[]{new InputFilter.LengthFilter(CELL_MAX_LEN)});
         cell.setBackgroundResource(R.drawable.border_white);
         TableRow.LayoutParams layoutParams = new TableRow.LayoutParams(
